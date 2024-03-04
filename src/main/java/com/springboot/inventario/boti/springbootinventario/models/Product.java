@@ -15,8 +15,10 @@ import lombok.Data;
 @Entity
 public class Product {
 
+
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO,generator = "native")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @GenericGenerator(name = "native",strategy = "native")
     
     private Long id;
@@ -27,6 +29,21 @@ public class Product {
 
     @ManyToOne
     private Category category;
+
+    
+
+    public Product() {
+    }
+
+
+
+    public Product(String name, BigDecimal price, String description, Integer stock) {
+        this.name = name;
+        this.price = price;
+        this.description = description;
+        this.stock = stock;
+    }
+    
 
 
     

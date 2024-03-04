@@ -17,7 +17,7 @@ import lombok.Data;
 public class Category {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO,generator = "native")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @GenericGenerator(name = "native",strategy = "native")
     private Long id;
 
@@ -25,6 +25,19 @@ public class Category {
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     private List<Product> products;
+
+    public Category(Long id, String name, List<Product> products) {
+        this.id = id;
+        this.name = name;
+        this.products = products;
+    }
+
+    public Category() {
+    }
+
+    
+
+    
 
 
     
