@@ -1,44 +1,25 @@
 package com.springboot.inventario.boti.springbootinventario.models;
 
-import java.util.List;
+import java.io.Serializable;
 
-import org.hibernate.annotations.GenericGenerator;
-
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.Data;
 
 @Data
 @Entity
-public class Category {
+@Table(name = "categories")
+public class Category implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @GenericGenerator(name = "native",strategy = "native")
     private Long id;
-
     private String name;
+    private String description;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
-    private List<Product> products;
-
-    public Category(Long id, String name, List<Product> products) {
-        this.id = id;
-        this.name = name;
-        this.products = products;
-    }
-
-    public Category() {
-    }
-
-    
-
-    
-
-
-    
 }

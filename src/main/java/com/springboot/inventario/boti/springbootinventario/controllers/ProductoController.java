@@ -1,82 +1,115 @@
 package com.springboot.inventario.boti.springbootinventario.controllers;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.io.IOException;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.springboot.inventario.boti.springbootinventario.dtos.ProductDTO;
 import com.springboot.inventario.boti.springbootinventario.models.Product;
-import com.springboot.inventario.boti.springbootinventario.repositories.ProductRepository;
+import com.springboot.inventario.boti.springbootinventario.response.ProductResponseRest;
+import com.springboot.inventario.boti.springbootinventario.services.IProductService;
+import com.springboot.inventario.boti.springbootinventario.util.ProductExcelExport;
 
+import jakarta.servlet.http.HttpServletResponse;
+
+@CrossOrigin(origins= {"http://localhost:5173"})
 @RestController
 @RequestMapping("/api")
 public class ProductoController {
 
-    @Autowired
-    private ProductRepository productRepository;
-
-    // Obtener productos
-    @GetMapping("/products")
-    public ResponseEntity<?> getProducts() {
-        // Obtén la lista de productos del repositorio
-        List<Product> products = productRepository.findAll();
-        
-        // Verifica si la lista de productos está vacía
-        if (products.isEmpty()) {
-            // Si no hay productos, devuelve un mensaje indicando que no hay stock
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No hay stock de productos disponible.");
-        }
-        
-        // Si hay productos, mapea los productos a DTO y devuelve la lista
-        List<ProductDTO> productDTOs = products.stream()
-            .map(ProductDTO::new)
-            .collect(Collectors.toList());
-        
-        return ResponseEntity.ok(productDTOs);
-    }
-
-    //Obtener productos por id
-    @SuppressWarnings("null")
-    @GetMapping("/products/{id}")
-    public ProductDTO getProductById(@PathVariable Long id){
-
-
-        return productRepository.findById(id).map(ProductDTO::new).orElse(null);
+   private IProductService productService;
+    public ProductoController(IProductService productService) {
+        this.productService = productService;
     }
 
     //Crear producto
-    @SuppressWarnings("null")
     @PostMapping("/create-products")
-    public ResponseEntity<Object> newProduct(@RequestBody Product product){
+    public ResponseEntity<ProductResponseRest> save(
+            //@RequestParam("picture")MultipartFile picture,
+            @RequestParam("name")String name,
+            @RequestParam("price")int price,
+            @RequestParam("stock")int stock,
+            @RequestParam("categoryId")Long categoryId) throws IOException
+    {
+        Product product = new Product();
+        product.setName(name);
+        product.setPrice(price);
+        product.setStock(stock);
 
-        if (product.equals(null)) {
-            return new ResponseEntity<>("Faltan datos", HttpStatus.FORBIDDEN);
-        }
+        ResponseEntity<ProductResponseRest> response = productService.save(product, categoryId);
 
-        productRepository.save(product);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+
+        return response;
     }
 
-    @SuppressWarnings("null")
-    @DeleteMapping("delete-product/{id}")
-    public ResponseEntity<Object> deleteProduct(@PathVariable Long id){
-
-        productRepository.deleteById(id);
-
-        return ResponseEntity.status(HttpStatus.OK).body("El producto con el id " + id + " ha sido eliminado");
-
-        
+    //Listar producto por id
+    @GetMapping("/products/{id}")
+    public ResponseEntity<ProductResponseRest> searchById(@PathVariable Long id){
+        ResponseEntity<ProductResponseRest> response = productService.searchById(id);
+        return response;
     }
 
-    
+    //Filtrar por nombre
+    @GetMapping("/products/filter/{name}")
+    public ResponseEntity<ProductResponseRest> searchByName(@PathVariable String name){
+        ResponseEntity<ProductResponseRest> response = productService.searchByName(name);
+        return response;
+    }
+
+    //Eliminar por id
+    @DeleteMapping("/products/{id}")
+    public ResponseEntity<ProductResponseRest> deleteById(@PathVariable Long id){
+        ResponseEntity<ProductResponseRest> response = productService.deleteById(id);
+        return response;
+    }
+
+    //Listar
+    @GetMapping("/products")
+    public ResponseEntity<ProductResponseRest> search(){
+        ResponseEntity<ProductResponseRest> response = productService.search();
+        return response;
+    }
+
+    //Actualizar
+     @PutMapping("/products/{id}")
+    public ResponseEntity<ProductResponseRest> update(
+            @PathVariable Long id,
+            @RequestParam("categoryId") Long categoryId,
+            //@RequestParam("picture")MultipartFile picture,
+            @RequestParam("name")String name,
+            @RequestParam("price")int price,
+            @RequestParam("stock")int stock) throws IOException
+    {
+        Product product = new Product();
+        product.setName(name);
+        product.setPrice(price);
+        product.setStock(stock);
+
+        ResponseEntity<ProductResponseRest> response = productService.update(id, categoryId, product);
+
+        return response;
+    }
+
+    //Exportar a Excel
+    @GetMapping("/products/export/excel")
+    public void exportToExcel(HttpServletResponse response) throws IOException {
+        response.setContentType("application/octet-stream");
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=productos.xlsx";
+        response.setHeader(headerKey, headerValue);
+
+        ResponseEntity<ProductResponseRest> productsResponse = productService.search();
+        ProductExcelExport excelExporter = new ProductExcelExport(productsResponse.getBody().getProduct().getProducts());
+        excelExporter.export(response);
+
+    }
 }
+

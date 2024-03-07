@@ -1,50 +1,36 @@
 package com.springboot.inventario.boti.springbootinventario.models;
 
-import java.math.BigDecimal;
+import java.io.Serializable;
 
-import org.hibernate.annotations.GenericGenerator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.Data;
 
 @Data
 @Entity
-public class Product {
-
-
+@Table(name = "products")
+public class Product  implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @GenericGenerator(name = "native",strategy = "native")
-    
     private Long id;
+
     private String name;
-    private BigDecimal  price;
-    private String description;
-    private Integer stock;
 
-    @ManyToOne
+    private int price;
+
+    private int stock;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
     private Category category;
-
-    
-
-    public Product() {
-    }
-
-
-
-    public Product(String name, BigDecimal price, String description, Integer stock) {
-        this.name = name;
-        this.price = price;
-        this.description = description;
-        this.stock = stock;
-    }
-    
-
 
     
 }
