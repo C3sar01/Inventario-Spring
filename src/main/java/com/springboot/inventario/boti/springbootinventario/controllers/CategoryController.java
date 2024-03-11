@@ -21,7 +21,7 @@ import com.springboot.inventario.boti.springbootinventario.util.CategoryExcelExp
 
 import jakarta.servlet.http.HttpServletResponse;
 
-@CrossOrigin(origins = {"http://localhost:5173"})
+@CrossOrigin(origins = {"http://localhost:4200"})
 @RestController
 @RequestMapping("/api")
 public class CategoryController {

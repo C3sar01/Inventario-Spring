@@ -20,7 +20,7 @@ import com.springboot.inventario.boti.springbootinventario.util.ProductExcelExpo
 
 import jakarta.servlet.http.HttpServletResponse;
 
-@CrossOrigin(origins= {"http://localhost:5173"})
+@CrossOrigin(origins= {"http://localhost:4200"})
 @RestController
 @RequestMapping("/api")
 public class ProductoController {
